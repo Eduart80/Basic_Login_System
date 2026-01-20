@@ -1,0 +1,53 @@
+const express =require('express')
+const router = express.Router()
+const User = require('../models/userAuth');
+
+// User create
+async function registerUser(req, res) {
+    try {
+        // Check if exists first
+        const existingUser = await User.findOne({ email: req.body.email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User email or password already exist" });
+        }
+        // if false create new user
+        const newUser = new User(req.body);
+        await newUser.save();
+        res.status(201).json({ success: true, data: newUser });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+// User verification with authN
+async function fetchAllUsers(req,res){
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        
+        if (!user) {
+            return res.status(400).json({ message: "Incorrect email or password" });
+        }
+        
+        const correctPw = await user.isCorrectPassword(req.body.password);
+        
+        if (!correctPw) {
+            return res.status(400).json({ message: "Incorrect email or password" });
+        }
+        
+        res.status(200).json({ 
+            success: true, 
+            message: "Login successful", 
+            user: { 
+                id: user._id, 
+                username: user.username, 
+                email: user.email 
+            } 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+module.exports = {
+    fetchAllUsers,
+    registerUser
+}
