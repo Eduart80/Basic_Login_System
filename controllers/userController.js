@@ -20,7 +20,7 @@ async function registerUser(req, res) {
 }
 
 // User verification with authN
-async function fetchAllUsers(req,res){
+async function fetchUser(req,res){
     try {
         const user = await User.findOne({ email: req.body.email });
         
@@ -38,7 +38,6 @@ async function fetchAllUsers(req,res){
             success: true, 
             message: "Login successful", 
             user: { 
-                id: user._id, 
                 username: user.username, 
                 email: user.email 
             } 
@@ -48,6 +47,6 @@ async function fetchAllUsers(req,res){
     }
 }
 module.exports = {
-    fetchAllUsers,
+    fetchUser,
     registerUser
 }

@@ -22,14 +22,14 @@ const userSchema = new Schema({
 });
 
 userSchema.pre("save", function (next) {
-  if (this.isNew || this.isModified("password")) {
+  const user = this;
+  if (user.isNew || user.isModified("password")) {
     const saltRounds = 10;
-    bcrypt.hash(this.password, saltRounds)
-      .then(hash => {
-        this.password = hash;
-        next();
-      })
-      .catch(err => next(err));
+    bcrypt.hash(user.password, saltRounds, function(err, hash) {
+      if (err) return next(err);
+      user.password = hash;
+      next();
+    });
   } else {
     next();
   }
