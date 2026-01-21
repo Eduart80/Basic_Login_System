@@ -21,18 +21,11 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.pre("save", function (next) {
-  const user = this;
-  if (user.isNew || user.isModified("password")) {
+userSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("password")) {
     const saltRounds = 10;
-    bcrypt.hash(user.password, saltRounds, function(err, hash) {
-      if (err) return next(err);
-      user.password = hash;
-      next();
-    });
-  } else {
-    next();
-  }
+    this.password = await bcrypt.hash(this.password, saltRounds);
+  } 
 });
 
 userSchema.methods.isCorrectPassword = async function (password) {
